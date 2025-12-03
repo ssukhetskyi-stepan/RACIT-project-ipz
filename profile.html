@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Профіль користувача</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="app-header">
+      <a href="index.html" class="app-header__link">
+        <div class="logo"></div>
+        <h1>Здоровенькі були</h1>
+      </a>
+    </header>
+
+    <section class="profile-section">
+      <h2>👤 Ваш профіль</h2>
+
+      <div class="profile-avatar">
+        <img src="https://via.placeholder.com/96x96.png?text=Avatar" alt="Аватар користувача" />
+      </div>
+
+      <div class="profile-info">
+        <p><strong>Ім’я:</strong> <span id="user-firstname">...</span></p>
+        <p><strong>Прізвище:</strong> <span id="user-lastname">...</span></p>
+        <p><strong>Email:</strong> <span id="user-email">...</span></p>
+      </div>
+
+      <div class="profile-stats">
+        <p><strong>Нагадувань створено:</strong> <span id="reminder-count">...</span></p>
+      </div>
+
+      <div class="profile-actions">
+        <button class="secondary-action" onclick="alert('Редагування профілю ще не реалізовано')">Редагувати профіль</button>
+        <button class="logout-button">Вийти з акаунту</button>
+      </div>
+    </section>
+  </div>
+
+  <script type="module">
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const auth = window.firebaseAuth;
+    const db = window.firestoreDB;
+
+    const firstNameEl = document.getElementById('user-firstname');
+    const lastNameEl = document.getElementById('user-lastname');
+    const emailEl = document.getElementById('user-email');
+    const countEl = document.getElementById('reminder-count');
+    const logoutBtn = document.querySelector('.logout-button');
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        alert("Ви не авторизовані. Перенаправлення...");
+        window.location.href = "index.html";
+        return;
+      }
+
+      emailEl.textContent = user.email;
+
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        firstNameEl.textContent = data.firstName || "—";
+        lastNameEl.textContent = data.lastName || "—";
+      }
+
+      const q = query(collection(db, "reminders"), where("uid", "==", user.uid));
+      const snapshot = await getDocs(q);
+      countEl.textContent = snapshot.size;
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      signOut(auth).then(() => {
+        window.location.href = "index.html";
+      });
+    });
+  </script>
+</body>
+</html>
