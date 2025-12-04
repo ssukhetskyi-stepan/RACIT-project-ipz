@@ -5,13 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Здоровенькі були</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .logo {
+      height: 48px;
+      width: 48px;
+      animation: blink 1.5s infinite;
+      background: white;
+      border-radius: 8px;
+      padding: 4px;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <!-- Header -->
     <header class="app-header">
       <a href="#" class="app-header__link">
-        <div class="logo"></div>
+        <!-- тут твій новий неоновий логотип -->
+        <img class="logo" src="logo.png" alt="Логотип Здоровенькі були" />
         <h1>Здоровенькі були</h1>
       </a>
       <nav class="nav-actions">
@@ -22,7 +37,7 @@
       </nav>
     </header>
 
-    <!-- Search -->
+    <!-- Search reminders -->
     <section class="search-bar">
       <div class="search-panel">
         <input id="search-input" type="text" placeholder="Пошук нагадувань..." />
@@ -53,11 +68,62 @@
     </section>
   </div>
 
+  <!-- Reminder dialog -->
+  <dialog class="schedule-dialog" id="schedule-dialog">
+    <form class="schedule-form" id="schedule-form">
+      <h2>Нове нагадування</h2>
+      <label>Тип нагадування:
+        <select id="reminder-type" required>
+          <option value="">— Оберіть —</option>
+          <option value="visit">Візит до лікаря</option>
+          <option value="medicine">Прийом ліків</option>
+        </select>
+      </label>
+      <div id="title-field">
+        <label>Назва:
+          <input type="text" id="reminder-title" placeholder="Напр. Ібупрофен" />
+        </label>
+      </div>
+      <label>Дата:<input type="date" id="reminder-date" required /></label>
+      <label>Час:<input type="time" id="reminder-time" required /></label>
+      <div id="doctor-field" hidden>
+        <label>Пошук лікаря:<input type="text" id="doctor-search" /></label>
+        <label>Оберіть лікаря:
+          <select id="doctor-list">
+            <option value="">— Оберіть лікаря —</option>
+          </select>
+        </label>
+      </div>
+      <div id="medicine-field" hidden>
+        <label>Пошук ліків:<input type="text" id="medicine-search" /></label>
+        <label>Оберіть ліки:
+          <select id="medicine-list">
+            <option value="">— Оберіть ліки —</option>
+          </select>
+        </label>
+        <label>Частота:
+          <select id="medicine-frequency">
+            <option value="">— Оберіть частоту —</option>
+            <option>1 раз на день</option>
+            <option>2 рази на день</option>
+            <option>3 рази на день</option>
+          </select>
+        </label>
+      </div>
+      <label>Коментар:<textarea id="reminder-comment" rows="3"></textarea></label>
+      <div class="dialog-actions">
+        <button type="submit" class="primary-action">Зберегти</button>
+        <button type="button" class="secondary-action" id="cancel-schedule">Скасувати</button>
+      </div>
+    </form>
+  </dialog>
+
   <!-- Profile dialog -->
   <dialog class="profile-dialog" id="profile-dialog">
     <div class="user-profile">
       <h2>Ваш профіль</h2>
       <div class="profile-photo">
+        <!-- силует-аватар за замовчуванням -->
         <img id="profile-photo" src="avatar-silhouette.svg" alt="Аватар користувача" />
         <input type="file" id="profile-photo-upload" accept="image/*" hidden />
         <label for="profile-photo-upload" class="upload-btn">Обрати файл</label>
@@ -66,13 +132,7 @@
       <p><strong>Ім’я:</strong> <span id="profile-firstname"></span></p>
       <p><strong>Прізвище:</strong> <span id="profile-lastname"></span></p>
       <p><strong>Email:</strong> <span id="profile-email"></span></p>
-      <label><span>Стать:</span>
-        <select id="profile-gender">
-          <option value="">— Оберіть —</option>
-          <option value="male">Чоловіча</option>
-          <option value="female">Жіноча</option>
-        </select>
-      </label>
+      <p><strong>Стать:</strong> <span id="profile-gender-text"></span></p>
       <div class="dialog-actions">
         <button type="button" class="secondary-action" id="close-profile">Закрити</button>
       </div>
@@ -83,11 +143,11 @@
   <dialog class="auth-dialog" id="auth-dialog">
     <form class="auth-form" id="register-form">
       <h2>Реєстрація</h2>
-      <label><span>Ім’я:</span><input type="text" id="regFirstname" required /></label>
-      <label><span>Прізвище:</span><input type="text" id="regLastname" required /></label>
-      <label><span>Email:</span><input type="email" id="regEmail" required /></label>
-      <label><span>Пароль:</span><input type="password" id="regPassword" required /></label>
-      <label><span>Стать:</span>
+      <label>Ім’я:<input type="text" id="regFirstname" required /></label>
+      <label>Прізвище:<input type="text" id="regLastname" required /></label>
+      <label>Email:<input type="email" id="regEmail" required /></label>
+      <label>Пароль:<input type="password" id="regPassword" required /></label>
+      <label>Стать:
         <select id="regGender" required>
           <option value="">— Оберіть —</option>
           <option value="male">Чоловіча</option>
@@ -105,8 +165,8 @@
   <dialog class="login-dialog" id="login-dialog">
     <form class="login-form" id="login-form">
       <h2>Вхід</h2>
-      <label><span>Email:</span><input type="email" id="loginEmail" required /></label>
-      <label><span>Пароль:</span><input type="password" id="loginPassword" required /></label>
+      <label>Email:<input type="email" id="loginEmail" required /></label>
+      <label>Пароль:<input type="password" id="loginPassword" required /></label>
       <div class="dialog-actions">
         <button type="submit" class="primary-action">Увійти</button>
         <button type="button" class="secondary-action cancel-login">Скасувати</button>
@@ -114,167 +174,28 @@
     </form>
   </dialog>
 
-  <!-- Reminder dialog (single; dynamic fields) -->
-  <dialog class="schedule-dialog" id="schedule-dialog">
-    <form class="schedule-form" id="schedule-form">
-      <h2>Нове нагадування</h2>
-
-      <label>Тип нагадування:
-        <select id="reminder-type" required>
-          <option value="">— Оберіть —</option>
-          <option value="visit">Візит до лікаря</option>
-          <option value="medicine">Прийом ліків</option>
-        </select>
-      </label>
-
-      <!-- Назва тільки для ліків -->
-      <div id="title-field">
-        <label>Назва нагадування:
-          <input type="text" id="reminder-title" placeholder="Напр. Ібупрофен" />
-        </label>
-      </div>
-
-      <label>Дата:
-        <input type="date" id="reminder-date" required />
-      </label>
-
-      <label>Час:
-        <input type="time" id="reminder-time" required />
-      </label>
-
-      <!-- Візит: пошук і випадаючий список із 20 лікарів -->
-      <div id="doctor-field" hidden>
-        <label>Пошук лікаря:
-          <input type="text" id="doctor-search" placeholder="Введіть спеціальність" />
-        </label>
-        <label>Оберіть лікаря:
-          <select id="doctor-list">
-            <option value="">— Оберіть лікаря —</option>
-            <option>Кардіолог</option>
-            <option>Терапевт</option>
-            <option>Хірург</option>
-            <option>Офтальмолог</option>
-            <option>Невролог</option>
-            <option>Педіатр</option>
-            <option>Дерматолог</option>
-            <option>Ендокринолог</option>
-            <option>Гінеколог</option>
-            <option>Уролог</option>
-            <option>Отоларинголог</option>
-            <option>Психіатр</option>
-            <option>Ревматолог</option>
-            <option>Інфекціоніст</option>
-            <option>Гастроентеролог</option>
-            <option>Пульмонолог</option>
-            <option>Нефролог</option>
-            <option>Стоматолог</option>
-            <option>Онколог</option>
-            <option>Алерголог</option>
-          </select>
-        </label>
-      </div>
-
-      <!-- Ліки: пошук, випадаючий список із 60 найменувань, частота прийому -->
-      <div id="medicine-field" hidden>
-        <label>Пошук ліків:
-          <input type="text" id="medicine-search" placeholder="Введіть назву препарату" />
-        </label>
-        <label>Оберіть ліки:
-          <select id="medicine-list">
-            <option value="">— Оберіть ліки —</option>
-            <option>Ібупрофен</option>
-            <option>Парацетамол</option>
-            <option>Аспірин</option>
-            <option>Амоксицилін</option>
-            <option>Амоксиклав</option>
-            <option>Азитроміцин</option>
-            <option>Доксициклін</option>
-            <option>Ципрофлоксацин</option>
-            <option>Кларитроміцин</option>
-            <option>Цефтріаксон</option>
-            <option>Метформін</option>
-            <option>Левотироксин</option>
-            <option>Аторвастатин</option>
-            <option>Симвастатин</option>
-            <option>Росувастатин</option>
-            <option>Омепразол</option>
-            <option>Пантопразол</option>
-            <option>Езомепразол</option>
-            <option>Ранитидин</option>
-            <option>Лозартан</option>
-            <option>Валсартан</option>
-            <option>Кандесартан</option>
-            <option>Амлодипін</option>
-            <option>Ніфедипін</option>
-            <option>Метопролол</option>
-            <option>Бісопролол</option>
-            <option>Атенолол</option>
-            <option>Карведилол</option>
-            <option>Фуросемід</option>
-            <option>Торасемід</option>
-            <option>Спіронолактон</option>
-            <option>Гідрохлортіазид</option>
-            <option>Преднізолон</option>
-            <option>Дексаметазон</option>
-            <option>Гідрокортизон</option>
-            <option>Будесонід</option>
-            <option>Салбутамол</option>
-            <option>Формотерол</option>
-            <option>Іпратропіум</option>
-            <option>Нітрогліцерин</option>
-            <option>Ізосорбіду мононітрат</option>
-            <option>Варфарин</option>
-            <option>Апіксабан</option>
-            <option>Клопідогрел</option>
-            <option>Диклофенак</option>
-            <option>Напроксен</option>
-            <option>Кеторолак</option>
-            <option>Мелоксикам</option>
-            <option>Німесулід</option>
-            <option>Цетиризин</option>
-            <option>Лоратадин</option>
-            <option>Фексофенадин</option>
-            <option>Діазолін</option>
-            <option>Активоване вугілля</option>
-            <option>Смекта (діосмектит)</option>
-            <option>Лоперамід</option>
-            <option>Метоклопрамід</option>
-            <option>Ондансетрон</option>
-            <option>Супрастин</option>
-            <option>Полісорб</option>
-            <option>Регідрон</option>
-            <option>Аскорбінова кислота</option>
-            <option>Магній В6</option>
-            <option>Панангін</option>
-            <option>Еналаприл</option>
-            <option>Раміприл</option>
-            <option>Празозин</option>
-            <option>Тамсулозин</option>
-          </select>
-        </label>
-        <label>Частота прийому:
-          <select id="medicine-frequency">
-            <option value="">— Оберіть частоту —</option>
-            <option>1 раз на день</option>
-            <option>2 рази на день</option>
-            <option>3 рази на день</option>
-          </select>
-        </label>
-      </div>
-
-      <!-- Final comment (styled like inputs via CSS) -->
-      <label>Додатковий коментар (за потреби):
-        <textarea id="reminder-comment" rows="3" placeholder="Додайте коментар за потреби"></textarea>
-      </label>
-
-      <div class="dialog-actions">
-        <button type="submit" class="primary-action">Зберегти</button>
-        <button type="button" class="secondary-action" id="cancel-schedule">Скасувати</button>
-      </div>
-    </form>
-  </dialog>
-
   <div id="toast-container"></div>
+
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <!-- EmailJS SDK -->
+  <script
+    type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+  </script>
+  <script type="text/javascript">
+    (function () {
+      emailjs.init({
+        publicKey: "vE00dZpRnRKTpLUdn", // твій EmailJS PUBLIC KEY
+      });
+      console.log("✅ EmailJS initialized");
+    })();
+  </script>
+
+  <!-- Основний скрипт з логікою -->
   <script src="script.js"></script>
 </body>
 </html>

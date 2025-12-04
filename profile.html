@@ -34,49 +34,84 @@
 
       <div class="profile-actions">
         <button class="secondary-action" onclick="alert('Редагування профілю ще не реалізовано')">Редагувати профіль</button>
-        <button class="logout-button">Вийти з акаунту</button>
+        <button class="logout-button" id="profile-logout-btn">Вийти з акаунту</button>
       </div>
     </section>
   </div>
 
-  <script type="module">
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  <!-- Firebase SDK (той самий compat стек) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-    const auth = window.firebaseAuth;
-    const db = window.firestoreDB;
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCMBo0gOn43_ovP4MiZpeGRRKX4EMjRxFg",
+      authDomain: "stepanproject-e1a89.firebaseapp.com",
+      projectId: "stepanproject-e1a89",
+      storageBucket: "stepanproject-e1a89.firebasestorage.app",
+      messagingSenderId: "910486338176",
+      appId: "1:910486338176:web:6d9456735d172736d94465",
+      measurementId: "G-E311946XF3"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
     const firstNameEl = document.getElementById('user-firstname');
     const lastNameEl = document.getElementById('user-lastname');
     const emailEl = document.getElementById('user-email');
     const countEl = document.getElementById('reminder-count');
-    const logoutBtn = document.querySelector('.logout-button');
+    const logoutBtn = document.getElementById('profile-logout-btn');
 
-    onAuthStateChanged(auth, async (user) => {
+    auth.onAuthStateChanged(async (user) => {
       if (!user) {
-        alert("Ви не авторизовані. Перенаправлення...");
+        alert("Ви не авторизовані. Перенаправлення на головну сторінку...");
         window.location.href = "index.html";
         return;
       }
 
-      emailEl.textContent = user.email;
+      emailEl.textContent = user.email || "—";
 
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists()) {
-        const data = userDoc.data();
-        firstNameEl.textContent = data.firstName || "—";
-        lastNameEl.textContent = data.lastName || "—";
+      try {
+        const userDoc = await db.collection("users").doc(user.uid).get();
+        if (userDoc.exists) {
+          const data = userDoc.data();
+          firstNameEl.textContent = data.firstName || "—";
+          lastNameEl.textContent = data.lastName || "—";
+        } else {
+          // fallback з displayName
+          const [fn = "—", ln = "—"] = (user.displayName || "").split(" ");
+          firstNameEl.textContent = fn;
+          lastNameEl.textContent = ln;
+        }
+      } catch (e) {
+        console.warn("Не вдалося прочитати users/{uid}", e);
       }
 
-      const q = query(collection(db, "reminders"), where("uid", "==", user.uid));
-      const snapshot = await getDocs(q);
-      countEl.textContent = snapshot.size;
+      try {
+        const snapshot = await db
+          .collection("reminders")
+          .where("uid", "==", user.uid)
+          .get();
+        countEl.textContent = snapshot.size;
+      } catch (e) {
+        console.warn("Не вдалося отримати reminders", e);
+        countEl.textContent = "—";
+      }
     });
 
-    logoutBtn.addEventListener('click', () => {
-      signOut(auth).then(() => {
-        window.location.href = "index.html";
-      });
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await auth.signOut();
+      } catch (e) {
+        console.warn("SignOut error", e);
+      }
+      window.location.href = "index.html";
     });
   </script>
 </body>

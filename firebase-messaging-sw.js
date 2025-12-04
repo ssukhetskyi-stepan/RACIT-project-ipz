@@ -1,5 +1,5 @@
-importScripts("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js");
-importScripts("https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js");
+importScripts("https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js");
 
 firebase.initializeApp({
   apiKey: "AIzaSyCMBo0gOn43_ovP4MiZpeGRRKX4EMjRxFg",
@@ -14,10 +14,10 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
   console.log("[firebase-messaging-sw.js] Отримано фонове повідомлення:", payload);
 
-  const { title, body } = payload.notification;
+  const { title, body } = payload.notification || {};
 
-  self.registration.showNotification(title, {
-    body: body,
-    icon: "/icon.png" // заміни на свій шлях до іконки або видали
+  self.registration.showNotification(title || "Нагадування", {
+    body: body || "",
+    icon: "/icon.png"
   });
 });
