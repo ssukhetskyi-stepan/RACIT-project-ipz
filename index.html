@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Здоровенькі були</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .logo-svg {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+    }
+    @keyframes neon-pulse {
+      0%, 100% { filter: drop-shadow(0 0 4px #00b8ff) drop-shadow(0 0 10px #0079ff); opacity: 1; }
+      50%       { filter: drop-shadow(0 0 10px #00b8ff) drop-shadow(0 0 22px #0079ff); opacity: 0.75; }
+    }
+    .logo-svg { animation: neon-pulse 1.8s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <header class="app-header logged-only">
+      <a href="#" class="app-header__link">
+        <svg class="logo-svg" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <rect x="18" y="4"  width="12" height="40" rx="3" fill="#00b8ff"/>
+          <rect x="4"  y="18" width="40" height="12" rx="3" fill="#00b8ff"/>
+        </svg>
+        <h1>Здоровенькі були</h1>
+      </a>
+      <nav class="nav-actions">
+        <a class="declaration-btn" href="https://moz.gov.ua/uk/jak-uklasti-dogovir-z-likarem" target="_blank" rel="noopener noreferrer">
+          📋 Декларація з лікарем
+        </a>
+        <button class="lang-btn" id="lang-btn" title="Zmień język / Змінити мову">🇺🇦 UA</button>
+        <button class="primary-action"   id="login-btn">Увійти</button>
+        <button class="secondary-action" id="register-btn">Реєстрація</button>
+        <button class="logout-button"    id="logout-btn"   hidden>Вийти</button>
+        <button class="profile-button"   id="profile-btn"  hidden>Профіль</button>
+      </nav>
+    </header>
+
+
+    <!-- Банер для незалогінених (Hero) -->
+    <section class="hero-banner" id="hero-banner">
+      <div class="hero-banner__content">
+        <div class="hero-banner__cross">
+          <svg width="64" height="64" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 12px #00b8ff);animation:neon-pulse 1.8s ease-in-out infinite;">
+            <rect x="18" y="4"  width="12" height="40" rx="3" fill="#00b8ff"/>
+            <rect x="4"  y="18" width="40" height="12" rx="3" fill="#00b8ff"/>
+          </svg>
+        </div>
+        <h2 class="hero-banner__title">Здоровенькі були</h2>
+        <p class="hero-banner__slogan">Ваш особистий помічник здоров'я — нагадування про ліки та візити до лікаря в одному місці</p>
+        <div class="hero-banner__features">
+          <div class="hero-banner__feature">
+            <span class="hero-banner__feature-icon">💊</span>
+            <span>Нагадування про прийом ліків</span>
+          </div>
+          <div class="hero-banner__feature">
+            <span class="hero-banner__feature-icon">🏥</span>
+            <span>Планування візитів до лікаря</span>
+          </div>
+          <div class="hero-banner__feature">
+            <span class="hero-banner__feature-icon">📋</span>
+            <span>Ваш особистий профіль здоров'я</span>
+          </div>
+        </div>
+        <div class="hero-banner__actions">
+          <button class="hero-register-btn" onclick="document.getElementById('register-btn').click()">Зареєструватись безкоштовно</button>
+          <button class="hero-login-btn" onclick="document.getElementById('login-btn').click()">Увійти в акаунт</button>
+        </div>
+
+        <!-- QR-код для презентації -->
+        <div class="hero-qr">
+          <div class="hero-qr__card">
+            <div class="hero-qr__code" id="qr-code"></div>
+            <p class="hero-qr__label">Відскануй для входу</p>
+            <p class="hero-qr__url" id="qr-url-text"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Банер підтвердження email -->
+    <div class="verify-banner" id="verify-banner" hidden>
+      <div class="verify-banner__icon">✉️</div>
+      <div class="verify-banner__text">
+        <strong>Підтвердіть вашу електронну пошту</strong>
+        <span id="verify-banner__email"></span>
+      </div>
+      <button class="verify-banner__resend" id="verify-resend-btn">Надіслати ще раз</button>
+      <button class="verify-banner__close" id="verify-close-btn">✕</button>
+    </div>
+
+    <!-- Картки статистики -->
+    <div class="stats-row logged-only" id="stats-row">
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--blue">📋</div>
+        <div class="stat-card__info">
+          <span class="stat-card__value" id="stat-total">0</span>
+          <span class="stat-card__label">Всього нагадувань</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--green">🏥</div>
+        <div class="stat-card__info">
+          <span class="stat-card__value" id="stat-visits">0</span>
+          <span class="stat-card__label">Візитів до лікаря</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__icon stat-card__icon--orange">💊</div>
+        <div class="stat-card__info">
+          <span class="stat-card__value" id="stat-meds">0</span>
+          <span class="stat-card__label">Прийомів ліків</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Пошук -->
+    <section class="search-bar logged-only">
+      <div class="search-panel">
+        <input id="search-input" type="text" placeholder="Пошук нагадувань..." />
+        <button class="secondary-action" id="search-btn">Пошук</button>
+      </div>
+    </section>
+
+    <!-- Таблиця нагадувань -->
+    <section class="visit-schedule logged-only">
+      <div class="visit-schedule__header">
+        <h2>Ваші нагадування</h2>
+        <div class="table-controls">
+          <select class="sort-select" id="sort-select">
+            <option value="newest">Новіші спочатку</option>
+            <option value="oldest">Старіші спочатку</option>
+            <option value="az">За алфавітом А→Я</option>
+            <option value="za">За алфавітом Я→А</option>
+            <option value="active">Ще триває</option>
+            <option value="done">Виконано</option>
+          </select>
+          <button class="primary-action" id="add-reminder-btn">+ Додати</button>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Тип</th>
+              <th>Назва</th>
+              <th>Дата</th>
+              <th>Час</th>
+              <th>Дії</th>
+            </tr>
+          </thead>
+          <tbody id="schedule-body">
+            <tr class="empty-state-row">
+              <td colspan="5">
+                <div class="empty-state">
+                  <div class="empty-state__icon">📭</div>
+                  <div class="empty-state__text">Нагадувань ще немає.<br>Натисніть «+ Додати», щоб створити перше.</div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Корисні статті -->
+    <section class="articles-section logged-only">
+      <h2 class="articles-title">📰 Корисні статті</h2>
+      <div class="articles-grid">
+
+        <a class="article-card" href="https://tsn.ua/zdorovya/chomu-samolikuvannya-mozhe-buti-nebezpechne-roz-yasnennya-vid-moz-2635125.html" target="_blank" rel="noopener noreferrer">
+          <div class="article-card__badge">МОЗ України</div>
+          <h3 class="article-card__title">Чому самолікування може бути небезпечним</h3>
+          <p class="article-card__desc">МОЗ пояснює, чому звернення до лікаря є єдиним безпечним рішенням і які ризики несе самостійний прийом ліків.</p>
+          <span class="article-card__link">Читати статтю →</span>
+        </a>
+
+        <a class="article-card" href="https://www.rbc.ua/rus/news/ukrayintsyam-nazvali-4-prichini-chomu-mozhna-1727359595.html" target="_blank" rel="noopener noreferrer">
+          <div class="article-card__badge">РБК-Україна</div>
+          <h3 class="article-card__title">4 причини не приймати таблетки без лікаря</h3>
+          <p class="article-card__desc">Самопризначення ліків — небезпечна звичка. Дізнайтесь, до яких наслідків це може призвести і як уникнути помилок.</p>
+          <span class="article-card__link">Читати статтю →</span>
+        </a>
+
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Діалог: нагадування -->
+  <dialog class="schedule-dialog" id="schedule-dialog">
+    <form class="schedule-form" id="schedule-form">
+      <h2>Нове нагадування</h2>
+      <label>Тип нагадування:
+        <select id="reminder-type" required>
+          <option value="">— Оберіть —</option>
+          <option value="visit">Візит до лікаря</option>
+          <option value="medicine">Прийом ліків</option>
+        </select>
+      </label>
+
+      <label>Дата:<input type="date" id="reminder-date" required /></label>
+      <label>Час:<input type="time" id="reminder-time" required /></label>
+
+      <!-- Поля для візиту до лікаря -->
+      <div id="doctor-field" hidden>
+        <label>Пошук лікаря:<input type="text" id="doctor-search" /></label>
+        <label>Оберіть лікаря:
+          <select id="doctor-list">
+            <option value="">— Оберіть лікаря —</option>
+          </select>
+        </label>
+      </div>
+
+      <!-- Поля для прийому ліків -->
+      <div id="medicine-field" hidden>
+        <label>Пошук ліків:<input type="text" id="medicine-search" /></label>
+        <label>Назва ліків:
+          <select id="medicine-list">
+            <option value="">— Оберіть ліки —</option>
+          </select>
+        </label>
+
+        <!-- Дозування для таблеток / капсул / рідин / інгалятора -->
+        <div id="dosage-standard-field">
+          <label>Дозування:
+            <select id="reminder-dosage">
+              <option value="">— Оберіть дозування —</option>
+              <optgroup label="Таблетки / капсули">
+                <option>0.5 таблетки</option>
+                <option>1 таблетка</option>
+                <option>2 таблетки</option>
+                <option>1 капсула</option>
+                <option>2 капсули</option>
+              </optgroup>
+              <optgroup label="Дозування (мг)">
+                <option>50 мг</option>
+                <option>100 мг</option>
+                <option>200 мг</option>
+                <option>250 мг</option>
+                <option>400 мг</option>
+                <option>500 мг</option>
+                <option>1000 мг</option>
+              </optgroup>
+              <optgroup label="Рідини">
+                <option>5 мл</option>
+                <option>10 мл</option>
+                <option>15 мл</option>
+                <option>20 мл</option>
+              </optgroup>
+              <optgroup label="Інгалятор">
+                <option>1 інгаляція</option>
+                <option>2 інгаляції</option>
+              </optgroup>
+            </select>
+          </label>
+        </div>
+
+        <!-- Дозування крапель (тільки для drops) -->
+        <div id="dosage-drops-field" hidden>
+          <label>Кількість крапель:
+            <select id="reminder-drops">
+              <option value="">— Оберіть кількість —</option>
+              <option>1 крапля</option>
+              <option>2 краплі</option>
+              <option>3 краплі</option>
+              <option>4 краплі</option>
+              <option>5 крапель</option>
+              <option>6 крапель</option>
+              <option>8 крапель</option>
+              <option>10 крапель</option>
+              <option>15 крапель</option>
+            </select>
+          </label>
+        </div>
+
+        <!-- Уточнення (для всіх) -->
+        <label>Уточнення:
+          <select id="reminder-title">
+            <option value="">— Оберіть уточнення —</option>
+            <optgroup label="Час прийому">
+              <option>До їжі</option>
+              <option>Під час їжі</option>
+              <option>Після їжі</option>
+              <option>Натщесерце</option>
+              <option>Перед сном</option>
+            </optgroup>
+            <optgroup label="Інше">
+              <option>За призначенням лікаря</option>
+              <option>Згідно з інструкцією</option>
+            </optgroup>
+          </select>
+        </label>
+
+        <label>Частота прийому:
+          <select id="medicine-frequency">
+            <option value="">— Оберіть частоту —</option>
+            <option>1 раз на день</option>
+            <option>2 рази на день</option>
+            <option>3 рази на день</option>
+            <option>4 рази на день</option>
+            <option>Кожні 4 години</option>
+            <option>Кожні 6 годин</option>
+            <option>Кожні 8 годин</option>
+            <option>Кожні 12 годин</option>
+            <option>1 раз на тиждень</option>
+            <option>За потребою</option>
+          </select>
+        </label>
+      </div>
+
+      <!-- Нагадати заздалегідь -->
+      <div id="remind-ahead-field" hidden>
+        <label id="remind-ahead-label">Нагадати за:
+          <select id="remind-ahead">
+            <option value="">— Не нагадувати заздалегідь —</option>
+          </select>
+        </label>
+      </div>
+
+      <label>Коментар:<textarea id="reminder-comment" rows="3"></textarea></label>
+      <div class="dialog-actions">
+        <button type="submit"  class="primary-action">Зберегти</button>
+        <button type="button"  class="secondary-action" id="cancel-schedule">Скасувати</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Діалог: профіль -->
+  <dialog class="profile-dialog" id="profile-dialog">
+    <div class="user-profile">
+      <h2>Ваш профіль</h2>
+      <div class="profile-photo">
+        <img id="profile-photo" src="avatar-silhouette.svg" alt="Аватар користувача" />
+        <input type="file" id="profile-photo-upload" accept="image/*" hidden />
+        <label for="profile-photo-upload" class="upload-btn">Обрати файл</label>
+        <span id="file-name">Файл не обрано</span>
+      </div>
+      <p><strong>Ім'я:</strong> <span id="profile-firstname"></span></p>
+      <p><strong>Прізвище:</strong> <span id="profile-lastname"></span></p>
+      <p><strong>Email:</strong> <span id="profile-email"></span></p>
+      <p><strong>Стать:</strong> <span id="profile-gender-text"></span></p>
+      <div class="dialog-actions">
+        <button type="button" class="secondary-action" id="close-profile">Закрити</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Діалог: реєстрація -->
+  <dialog class="auth-dialog" id="auth-dialog">
+    <form class="auth-form" id="register-form">
+      <h2>Реєстрація</h2>
+      <label>Ім'я:<input type="text" id="regFirstname" required /></label>
+      <label>Прізвище:<input type="text" id="regLastname" required /></label>
+      <label>Email:<input type="email" id="regEmail" required /></label>
+      <label>Пароль:<input type="password" id="regPassword" required minlength="8" /></label>
+      <div class="password-rules" id="password-rules">
+        <div class="password-rule" id="rule-length">
+          <span class="rule-icon">○</span> Мінімум 8 символів
+        </div>
+        <div class="password-rule" id="rule-upper">
+          <span class="rule-icon">○</span> Хоча б одна велика буква
+        </div>
+        <div class="password-rule" id="rule-digit">
+          <span class="rule-icon">○</span> Хоча б одна цифра
+        </div>
+        <div class="password-strength">
+          <div class="password-strength__bar">
+            <div class="password-strength__fill" id="strength-fill"></div>
+          </div>
+          <span class="password-strength__label" id="strength-label">Введіть пароль</span>
+        </div>
+      </div>
+      <label>Повторіть пароль:<input type="password" id="regPassword2" required minlength="8" /></label>
+      <label>Стать:
+        <select id="regGender" required>
+          <option value="">— Оберіть —</option>
+          <option value="male">Чоловіча</option>
+          <option value="female">Жіноча</option>
+        </select>
+      </label>
+      <div class="dialog-actions">
+        <button type="submit"  class="primary-action">Зареєструватися</button>
+        <button type="button"  class="secondary-action cancel-register">Скасувати</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Діалог: вхід -->
+  <dialog class="login-dialog" id="login-dialog">
+    <form class="login-form" id="login-form">
+      <h2>Вхід</h2>
+      <label>Email:<input type="email" id="loginEmail" required /></label>
+      <label>Пароль:<input type="password" id="loginPassword" required /></label>
+      <p class="forgot-link-wrap">
+        <a href="#" id="forgot-link">Забули пароль?</a>
+      </p>
+      <div class="dialog-actions">
+        <button type="submit"  class="primary-action">Увійти</button>
+        <button type="button"  class="secondary-action cancel-login">Скасувати</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Діалог: скидання пароля -->
+  <dialog class="auth-dialog" id="forgot-dialog">
+    <form class="auth-form" id="forgot-form">
+      <h2>Скидання пароля</h2>
+      <p style="font-size:0.9rem;color:#555;margin:0 0 0.5rem;">
+        Введіть ваш email — надішлемо посилання для скидання пароля.
+      </p>
+      <label>Email:<input type="email" id="forgotEmail" required /></label>
+      <div class="dialog-actions">
+        <button type="submit"  class="primary-action">Надіслати</button>
+        <button type="button"  class="secondary-action" id="cancel-forgot">Скасувати</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Діалог: очікування підтвердження email -->
+  <dialog class="auth-dialog" id="pending-dialog">
+    <div class="pending-body">
+      <div class="pending-icon">✉️</div>
+      <h2>Підтвердіть вашу пошту</h2>
+      <p class="pending-desc">
+        Ми надіслали лист на адресу<br>
+        <strong id="pending-email"></strong>
+      </p>
+      <p class="pending-hint">
+        Перейдіть за посиланням у листі — після цього зможете увійти в акаунт.
+      </p>
+      <div class="pending-actions">
+        <button class="pending-resend" id="pending-resend-btn">Надіслати ще раз</button>
+        <button class="secondary-action" id="pending-close-btn">Закрити</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Діалог: підтвердження видалення -->
+  <dialog class="confirm-dialog" id="confirm-dialog">
+    <div class="confirm-body">
+      <p id="confirm-message">Ви впевнені?</p>
+      <div class="dialog-actions">
+        <button type="button" class="logout-button"    id="confirm-yes">Видалити</button>
+        <button type="button" class="secondary-action" id="confirm-no">Скасувати</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div id="toast-container"></div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    (function () {
+      emailjs.init({ publicKey: "ZRFQDazaBMBj9p93Z" });
+    })();
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

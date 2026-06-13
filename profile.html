@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Профіль — Здоровенькі були</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .logo-svg {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+    }
+    @keyframes neon-pulse {
+      0%, 100% { filter: drop-shadow(0 0 4px #00b8ff) drop-shadow(0 0 10px #0079ff); opacity: 1; }
+      50%       { filter: drop-shadow(0 0 10px #00b8ff) drop-shadow(0 0 22px #0079ff); opacity: 0.75; }
+    }
+    .logo-svg { animation: neon-pulse 1.8s ease-in-out infinite; }
+
+    .profile-section {
+      background: #fff;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+      max-width: 480px;
+    }
+
+    .profile-section h2 {
+      margin: 0 0 1.5rem;
+      color: #0079ff;
+      font-size: 1.3rem;
+      text-align: center;
+    }
+
+    .profile-avatar {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .profile-info p,
+    .profile-stats p {
+      margin: 0.4rem 0;
+      font-size: 0.95rem;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .profile-stats {
+      margin-top: 1rem;
+    }
+
+    .profile-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="app-header">
+      <a href="index.html" class="app-header__link">
+        <svg class="logo-svg" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <rect x="18" y="4"  width="12" height="40" rx="3" fill="#00b8ff"/>
+          <rect x="4"  y="18" width="40" height="12" rx="3" fill="#00b8ff"/>
+        </svg>
+        <h1>Здоровенькі були</h1>
+      </a>
+    </header>
+
+    <section class="profile-section">
+      <h2>Ваш профіль</h2>
+
+      <div class="profile-avatar">
+        <img src="avatar-silhouette.svg" alt="Аватар користувача"
+          style="width:96px;height:96px;border-radius:50%;border:3px solid #0079ff;object-fit:cover;" />
+      </div>
+
+      <div class="profile-info">
+        <p><strong>Ім'я:</strong> <span id="user-firstname">...</span></p>
+        <p><strong>Прізвище:</strong> <span id="user-lastname">...</span></p>
+        <p><strong>Email:</strong> <span id="user-email">...</span></p>
+        <p><strong>Стать:</strong> <span id="user-gender">...</span></p>
+      </div>
+
+      <div class="profile-stats">
+        <p><strong>Нагадувань створено:</strong> <span id="reminder-count">...</span></p>
+      </div>
+
+      <div class="profile-actions">
+        <button class="secondary-action" disabled
+          style="opacity:0.5;cursor:not-allowed;"
+          title="Буде доступно у наступній версії">
+          Редагувати профіль
+        </button>
+        <button class="logout-button" id="profile-logout-btn">Вийти з акаунту</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyALT4nNnGuiqpLN4S1QFm4el9742xB20vI",
+      authDomain: "zdorovenki-buly-app.firebaseapp.com",
+      projectId: "zdorovenki-buly-app",
+      storageBucket: "zdorovenki-buly-app.firebasestorage.app",
+      messagingSenderId: "634015822794",
+      appId: "1:634015822794:web:32f4debc3910731f4a1533"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+    const db   = firebase.firestore();
+
+    const genderLabel = { male: "Чоловіча", female: "Жіноча" };
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        // Тихе перенаправлення без alert()
+        window.location.href = "index.html";
+        return;
+      }
+
+      document.getElementById("user-email").textContent = user.email || "—";
+
+      try {
+        const snap = await db.collection("users").doc(user.uid).get();
+        if (snap.exists) {
+          const d = snap.data();
+          document.getElementById("user-firstname").textContent = d.firstName || "—";
+          document.getElementById("user-lastname").textContent  = d.lastName  || "—";
+          document.getElementById("user-gender").textContent    = genderLabel[d.gender] || "Не вказано";
+        } else {
+          const parts = (user.displayName || "").split(" ");
+          document.getElementById("user-firstname").textContent = parts[0] || "—";
+          document.getElementById("user-lastname").textContent  = parts[1] || "—";
+          document.getElementById("user-gender").textContent    = "Не вказано";
+        }
+      } catch (e) {
+        console.warn("Firestore read failed", e);
+      }
+
+      try {
+        const snapshot = await db
+          .collection("reminders")
+          .where("uid", "==", user.uid)
+          .get();
+        document.getElementById("reminder-count").textContent = snapshot.size;
+      } catch (e) {
+        console.warn("Reminders count failed", e);
+        document.getElementById("reminder-count").textContent = "—";
+      }
+    });
+
+    document.getElementById("profile-logout-btn").addEventListener("click", async () => {
+      try { await auth.signOut(); } catch (e) { console.warn("SignOut error", e); }
+      window.location.href = "index.html";
+    });
+  </script>
+</body>
+</html>
